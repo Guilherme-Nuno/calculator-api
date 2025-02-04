@@ -8,9 +8,9 @@ import org.springframework.kafka.core.KafkaTemplate;
 public class KafkaProducer {
 
     @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private KafkaTemplate<String, CalculatorRequest> kafkaTemplate;
 
-    public void sendCalculationRequest(String topic, String message) {
-        kafkaTemplate.send(topic, message);
+    public void sendCalculationRequest(String topic, CalculatorRequest request) {
+        kafkaTemplate.send(topic, request);
     }
 }
