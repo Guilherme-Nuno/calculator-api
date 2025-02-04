@@ -1,5 +1,6 @@
 package com.guilherme.rest;
 
+import com.guilherme.common.CalculatorRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,10 +11,10 @@ import java.math.BigDecimal;
 public class CalculatorController {
 
     @Autowired
-    private KafkaProducer kafkaProducer;
+    private RestProducer restProducer;
 
     @Autowired
-    private KafkaConsumer kafkaConsumer;
+    private RestConsumer restConsumer;
 
     @GetMapping("/{operation}")
     public void sendRequest(
@@ -23,6 +24,6 @@ public class CalculatorController {
             ) {
         CalculatorRequest request = new CalculatorRequest(operation, a, b);
 
-        kafkaProducer.sendCalculationRequest("calculator-requests", request);
+        restProducer.sendCalculationRequest(request);
     }
 }

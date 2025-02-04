@@ -1,10 +1,10 @@
 package com.guilherme.rest;
 
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
-public class KafkaConsumer {
+@Component
+public class RestConsumer {
 
     @KafkaListener(topics = "calculator-results", groupId = "calculator-group")
     public void receiveResult(String result) {

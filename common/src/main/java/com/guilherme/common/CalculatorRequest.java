@@ -1,8 +1,9 @@
-package com.guilherme.rest;
+package com.guilherme.common;
 
 import java.math.BigDecimal;
 
 public class CalculatorRequest {
+    // TODO Add new UUID field
     private String operation;
     private BigDecimal a;
     private BigDecimal b;

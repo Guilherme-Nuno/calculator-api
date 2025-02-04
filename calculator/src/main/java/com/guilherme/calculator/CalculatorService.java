@@ -1,6 +1,8 @@
 package com.guilherme.calculator;
 
-import org.springframework.kafka.core.KafkaTemplate;
+import com.guilherme.common.CalculatorRequest;
+import com.guilherme.common.CalculatorResult;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -8,37 +10,32 @@ import java.math.RoundingMode;
 
 @Service
 public class CalculatorService {
+    private final CalculatorConsumer calculatorConsumer;
+    private final CalculatorProducer calculatorProducer;
 
-    private final KafkaTemplate<String, String> kafkaTemplate;
-
-    public CalculatorService(KafkaTemplate<String, String> kafkaTemplate) {
-        this.kafkaTemplate = kafkaTemplate;
+    @Autowired
+    public CalculatorService(CalculatorProducer calculatorProducer, CalculatorConsumer calculatorConsumer) {
+        this.calculatorConsumer = calculatorConsumer;
+        this.calculatorProducer = calculatorProducer;
     }
 
-    public void processCalculationRequest(String request) {
-        // Parse the request message to get operands and operation (for simplicity)
-        String[] parts = request.split(" ");
-        String operation = parts[0];  // Example: "sum"
-        BigDecimal operand1 = new BigDecimal(parts[1]);
-        BigDecimal operand2 = new BigDecimal(parts[2]);
-
+    public void processCalculationRequest(CalculatorRequest request) {
         BigDecimal result = BigDecimal.ZERO;
-        switch (operation) {
-            case "sum":
-                result = operand1.add(operand2);
+
+        switch (request.getOperation()) {
+            case "add":
+                result = request.getA().add(request.getB());
                 break;
-            case "subtract":
-                result = operand1.subtract(operand2);
+            case "sub":
+                result = request.getA().subtract(request.getB());
                 break;
-            case "multiply":
-                result = operand1.multiply(operand2);
+            case "mul":
+                result = request.getA().multiply(request.getB());
                 break;
-            case "divide":
-                result = operand1.divide(operand2, RoundingMode.HALF_UP);
-                break;
+            case "div":
+                result = request.getA().divide(request.getB(), RoundingMode.HALF_UP);
         }
 
-        // Send the result back to the 'calculator-results' topic
-        kafkaTemplate.send("calculator-results", result.toString());
+        calculatorProducer.sendCalculationResult(new CalculatorResult(result));
     }
 }

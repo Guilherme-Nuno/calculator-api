@@ -1,20 +1,20 @@
 package com.guilherme.calculator;
 
+import com.guilherme.common.CalculatorRequest;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
-public class KafkaConsumer {
+@Component
+public class CalculatorConsumer {
 
     private final CalculatorService calculatorService;
 
-    public KafkaConsumer(CalculatorService calculatorService) {
+    public CalculatorConsumer(CalculatorService calculatorService) {
         this.calculatorService = calculatorService;
     }
 
     @KafkaListener(topics = "calculator-requests", groupId = "calculator-group")
-    public void listenForCalculationRequests(String request) {
-        // Call the service to process the calculation
+    public void listenForCalculationRequests(CalculatorRequest request) {
         calculatorService.processCalculationRequest(request);
     }
 }

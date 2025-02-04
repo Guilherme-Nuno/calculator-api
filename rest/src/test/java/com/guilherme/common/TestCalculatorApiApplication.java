@@ -1,4 +1,4 @@
-package com.guilherme.calculator_api;
+package com.guilherme.common;
 
 import org.springframework.boot.SpringApplication;
 
