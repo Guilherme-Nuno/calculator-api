@@ -23,21 +23,25 @@ public class CalculatorService {
     public void processCalculationRequest(UUID id, CalculatorRequest request) {
         BigDecimal result;
 
-        switch (request.getOperation()) {
-            case "add":
-                result = request.getA().add(request.getB());
-                break;
-            case "sub":
-                result = request.getA().subtract(request.getB());
-                break;
-            case "mul":
-                result = request.getA().multiply(request.getB());
-                break;
-            case "div":
-                result = request.getA().divide(request.getB(), RoundingMode.HALF_UP);
-                break;
-            default:
-                result = null;
+        try {
+            switch (request.getOperation()) {
+                case "add":
+                    result = request.getA().add(request.getB());
+                    break;
+                case "sub":
+                    result = request.getA().subtract(request.getB());
+                    break;
+                case "mul":
+                    result = request.getA().multiply(request.getB());
+                    break;
+                case "div":
+                    result = request.getA().divide(request.getB(), RoundingMode.HALF_UP);
+                    break;
+                default:
+                    result = null;
+            }
+        } catch (ArithmeticException exception) {
+            throw new ArithmeticException("Division by 0 is not possible.");
         }
 
         calculatorProducer.sendCalculationResult(id, new CalculatorResult(result));
