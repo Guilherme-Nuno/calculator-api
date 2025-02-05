@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public class CalculatorRequest {
-    private UUID id;
     private String operation;
     private BigDecimal a;
     private BigDecimal b;
@@ -12,8 +11,7 @@ public class CalculatorRequest {
     // Empty constructor for serialization
     public CalculatorRequest() {}
 
-    public CalculatorRequest(UUID id, String operation, BigDecimal a, BigDecimal b) {
-        this.id = id;
+    public CalculatorRequest(String operation, BigDecimal a, BigDecimal b) {
         this.operation = operation;
         this.a = a;
         this.b = b;
@@ -29,9 +27,5 @@ public class CalculatorRequest {
 
     public BigDecimal getB() {
         return b;
-    }
-
-    public UUID getId() {
-        return id;
     }
 }

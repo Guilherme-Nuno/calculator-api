@@ -2,7 +2,10 @@ package com.guilherme.calculator;
 
 import com.guilherme.common.CalculatorRequest;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
 
 @Component
 public class CalculatorConsumer {
@@ -14,7 +17,7 @@ public class CalculatorConsumer {
     }
 
     @KafkaListener(topics = "calculator-requests", groupId = "calculator-group")
-    public void listenForCalculationRequests(CalculatorRequest request) {
-        calculatorService.processCalculationRequest(request);
+    public void listenForCalculationRequests(@Header("X-Request-ID") UUID id, CalculatorRequest request) {
+        calculatorService.processCalculationRequest(id, request);
     }
 }

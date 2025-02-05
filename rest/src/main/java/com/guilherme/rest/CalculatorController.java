@@ -34,21 +34,21 @@ public class CalculatorController {
             ) {
         UUID id = UUID.randomUUID();
 
-        CalculatorRequest request = new CalculatorRequest(id, operation, a, b);
+        CalculatorRequest request = new CalculatorRequest(operation, a, b);
 
         CompletableFuture<CalculatorResult> futureResult = new CompletableFuture<>();
         pendingResults.put(id, futureResult);
 
-        restProducer.sendCalculationRequest(request);
+        restProducer.sendCalculationRequest(id, request);
 
         return futureResult.thenApply(result ->
                 ResponseEntity.ok()
-                        .header("X-Request-ID", result.getId().toString())
+                        .header("X-Request-ID", id.toString())
                         .body(result));
     }
 
-    public void completeRequest(CalculatorResult result) {
-        CompletableFuture<CalculatorResult> futureResult = pendingResults.remove(result.getId());
+    public void completeRequest(UUID id, CalculatorResult result) {
+        CompletableFuture<CalculatorResult> futureResult = pendingResults.remove(id);
         if (futureResult != null) {
             futureResult.complete(result);
         }

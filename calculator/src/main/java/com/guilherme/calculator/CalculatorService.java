@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.UUID;
 
 @Service
 public class CalculatorService {
@@ -19,8 +20,8 @@ public class CalculatorService {
     @Autowired
     private CalculatorProducer calculatorProducer;
 
-    public void processCalculationRequest(CalculatorRequest request) {
-        BigDecimal result = BigDecimal.ZERO;
+    public void processCalculationRequest(UUID id, CalculatorRequest request) {
+        BigDecimal result;
 
         switch (request.getOperation()) {
             case "add":
@@ -34,8 +35,11 @@ public class CalculatorService {
                 break;
             case "div":
                 result = request.getA().divide(request.getB(), RoundingMode.HALF_UP);
+                break;
+            default:
+                result = null;
         }
 
-        calculatorProducer.sendCalculationResult(new CalculatorResult(request.getId(), result));
+        calculatorProducer.sendCalculationResult(id, new CalculatorResult(result));
     }
 }
