@@ -25,11 +25,11 @@ public class CalculatorServiceTest {
     @Autowired
     private CalculatorService calculatorService;
 
-    private UUID id;
+    private String id;
 
     @BeforeEach
     void setUp() {
-        id = UUID.randomUUID();
+        id = UUID.randomUUID().toString();
     }
 
     @Test

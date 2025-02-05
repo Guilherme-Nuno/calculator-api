@@ -15,7 +15,7 @@ public class CalculatorProducer {
     @Autowired
     KafkaTemplate<String, CalculatorResult> kafkaTemplate;
 
-    public void sendCalculationResult(UUID id, CalculatorResult result) {
+    public void sendCalculationResult(String id, CalculatorResult result) {
         kafkaTemplate.send(MessageBuilder
                     .withPayload(result)
                     .setHeader(KafkaHeaders.TOPIC, "calculator-results")

@@ -15,7 +15,7 @@ public class RestProducer {
     @Autowired
     private KafkaTemplate<String, CalculatorRequest> kafkaTemplate;
 
-    public void sendCalculationRequest(UUID id, CalculatorRequest request) {
+    public void sendCalculationRequest(String id, CalculatorRequest request) {
         kafkaTemplate.send(MessageBuilder
                             .withPayload(request)
                             .setHeader(KafkaHeaders.TOPIC, "calculator-requests")

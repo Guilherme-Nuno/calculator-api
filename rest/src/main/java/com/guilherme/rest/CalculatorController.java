@@ -2,13 +2,16 @@ package com.guilherme.rest;
 
 import com.guilherme.common.CalculatorRequest;
 import com.guilherme.common.CalculatorResult;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -17,7 +20,9 @@ import java.util.concurrent.ConcurrentMap;
 @RequestMapping("/api")
 public class CalculatorController {
 
-    private final ConcurrentMap<UUID, CompletableFuture<CalculatorResult>> pendingResults = new ConcurrentHashMap<>();
+    private static final Logger logger = LoggerFactory.getLogger(CalculatorController.class);
+
+    private final ConcurrentMap<String, CompletableFuture<CalculatorResult>> pendingResults = new ConcurrentHashMap<>();
 
     @Autowired
     private RestProducer restProducer;
@@ -32,7 +37,8 @@ public class CalculatorController {
             @RequestParam BigDecimal a,
             @RequestParam BigDecimal b
             ) {
-        UUID id = UUID.randomUUID();
+        String id = MDC.get("X-Request-ID");
+        logger.info("Received request for {}: a = {}, b = {}", operation, a, b);
 
         CalculatorRequest request = new CalculatorRequest(operation, a, b);
 
@@ -40,17 +46,21 @@ public class CalculatorController {
         pendingResults.put(id, futureResult);
 
         restProducer.sendCalculationRequest(id, request);
+        logger.info("Sent request for calculator service.");
 
         return futureResult.thenApply(result ->
                 ResponseEntity.ok()
-                        .header("X-Request-ID", id.toString())
+                        .header("X-Request-ID", id)
                         .body(result));
     }
 
-    public void completeRequest(UUID id, CalculatorResult result) {
+    public void completeRequest(String id, CalculatorResult result) {
         CompletableFuture<CalculatorResult> futureResult = pendingResults.remove(id);
         if (futureResult != null) {
             futureResult.complete(result);
+            MDC.put("X-Request-ID", id);
+            logger.info("Completed request");
+            MDC.remove("X-Request-ID");
         }
     }
 }

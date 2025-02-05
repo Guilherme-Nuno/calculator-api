@@ -17,7 +17,7 @@ public class CalculatorConsumer {
     }
 
     @KafkaListener(topics = "calculator-requests", groupId = "calculator-group")
-    public void listenForCalculationRequests(@Header("X-Request-ID") UUID id, CalculatorRequest request) {
+    public void listenForCalculationRequests(@Header("X-Request-ID") String id, CalculatorRequest request) {
         calculatorService.processCalculationRequest(id, request);
     }
 }

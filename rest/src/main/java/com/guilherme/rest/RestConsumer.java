@@ -15,7 +15,7 @@ public class RestConsumer {
     CalculatorController calculatorController;
 
     @KafkaListener(topics = "calculator-results", groupId = "calculator-group")
-    public void receiveResult(@Header("X-Request-ID") UUID id, CalculatorResult result) {
+    public void receiveResult(@Header("X-Request-ID") String id, CalculatorResult result) {
         calculatorController.completeRequest(id, result);
     }
 }
