@@ -1,9 +1,8 @@
 package com.guilherme.common;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
-public class CalculatorResult {
+public class CalculatorResult extends CalculatorResponse{
     private BigDecimal result;
 
     public CalculatorResult() {}

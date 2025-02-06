@@ -77,18 +77,13 @@ public class CalculatorServiceTest {
     }
 
     @Test
-    void testDivisionByZero() {
-        CalculatorRequest request = new CalculatorRequest("div", new BigDecimal(6), new BigDecimal(0));
-        Exception exception = null;
+    void testDivisionWithDecimals() {
+        CalculatorRequest request = new CalculatorRequest("div", new BigDecimal(1), new BigDecimal(4));
+        calculatorService.processCalculationRequest(id, request);
 
-        try {
-            calculatorService.processCalculationRequest(id, request);
-        } catch (ArithmeticException e) {
-            exception = e;
-        }
+        ArgumentCaptor<CalculatorResult> resultArgumentCaptor = ArgumentCaptor.forClass(CalculatorResult.class);
 
-        assert exception != null;
-        assertEquals("Division by 0 is not possible.", exception.getMessage());
-
+        verify(calculatorProducer).sendCalculationResult(eq(id), resultArgumentCaptor.capture());
+        assertEquals(new BigDecimal("0.25"), resultArgumentCaptor.getValue().getResult());
     }
 }

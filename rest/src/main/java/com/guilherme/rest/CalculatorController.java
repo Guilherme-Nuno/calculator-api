@@ -1,6 +1,8 @@
 package com.guilherme.rest;
 
+import com.guilherme.common.CalculatorError;
 import com.guilherme.common.CalculatorRequest;
+import com.guilherme.common.CalculatorResponse;
 import com.guilherme.common.CalculatorResult;
 
 import org.slf4j.Logger;
@@ -22,7 +24,7 @@ public class CalculatorController {
 
     private static final Logger logger = LoggerFactory.getLogger(CalculatorController.class);
 
-    private final ConcurrentMap<String, CompletableFuture<CalculatorResult>> pendingResults = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, CompletableFuture<CalculatorResponse>> pendingResults = new ConcurrentHashMap<>();
 
     @Autowired
     private RestProducer restProducer;
@@ -32,7 +34,7 @@ public class CalculatorController {
     private RestConsumer restConsumer;
 
     @GetMapping("/{operation}")
-    public CompletableFuture<ResponseEntity<CalculatorResult>> sendRequest(
+    public CompletableFuture<ResponseEntity<CalculatorResponse>> sendRequest(
             @PathVariable String operation,
             @RequestParam BigDecimal a,
             @RequestParam BigDecimal b
@@ -42,24 +44,41 @@ public class CalculatorController {
 
         CalculatorRequest request = new CalculatorRequest(operation, a, b);
 
-        CompletableFuture<CalculatorResult> futureResult = new CompletableFuture<>();
+        CompletableFuture<CalculatorResponse> futureResult = new CompletableFuture<>();
         pendingResults.put(id, futureResult);
 
         restProducer.sendCalculationRequest(id, request);
         logger.info("Sent request for calculator service.");
 
-        return futureResult.thenApply(result ->
-                ResponseEntity.ok()
-                        .header("X-Request-ID", id)
-                        .body(result));
+        return futureResult
+                .thenApply(result ->
+                        ResponseEntity.ok()
+                                .header("X-Request-ID", id)
+                                .body(result)
+                )
+                .exceptionally(ex ->
+                        ResponseEntity.badRequest()
+                                .header("X-Request-ID", id)
+                                .body(new CalculatorError(ex.getMessage()))
+                );
     }
 
     public void completeRequest(String id, CalculatorResult result) {
-        CompletableFuture<CalculatorResult> futureResult = pendingResults.remove(id);
+        CompletableFuture<CalculatorResponse> futureResult = pendingResults.remove(id);
         if (futureResult != null) {
             futureResult.complete(result);
             MDC.put("X-Request-ID", id);
             logger.info("Completed request");
+            MDC.remove("X-Request-ID");
+        }
+    }
+
+    public void completeRequestWithError(String id, CalculatorError message) {
+        CompletableFuture<CalculatorResponse> futureResult = pendingResults.remove(id);
+        if (futureResult != null) {
+            futureResult.completeExceptionally(new RuntimeException(message.getError()));
+            MDC.put("X-Request-ID", id);
+            logger.info("Request completed with error: {}", message.getError());
             MDC.remove("X-Request-ID");
         }
     }
